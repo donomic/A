@@ -1,0 +1,117 @@
+`timescale 1ns / 1ps
+module sequence_detector (
+    input wire clk,
+    input wire rst,
+    input wire sequence,
+    output reg tick
+);
+
+// State declarations
+localparam a = 2'b00;
+localparam b = 2'b01;
+localparam c = 2'b10;
+localparam d = 2'b11;
+
+// Signals
+reg presentState;
+reg nextState;
+
+// State assignments
+always @(posedge clk, posedge rst) begin
+    if (rst)
+        presentState <= a;
+    else if (clk)
+        presentState <= nextState;
+end
+
+// Next state logic
+always @* begin
+    nextState = presentState;
+    tick = 1'b0;
+
+    case (presentState)
+        a: if (sequence) nextState = b;
+        b: begin
+            if (sequence) nextState = c;
+            else nextState = a;
+        end
+end
+c : if(~sequence) nextState = d;
+d :
+begin
+    if(sequence)
+    begin
+        tick = 1'b1;
+        nextState = b;
+    end
+    else nextState = a;
+end
+default :
+begin
+    tick = 1'b0;
+    nextState = a;
+end
+endcase
+end
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`timescale 1ns / 1ps
+module sequence_detector_tb();
+
+reg clk, rst;
+reg sequence;
+wire tick;
+
+// Initialize reg ports
+initial begin
+    clk = 1'b0;
+    sequence = 1'b0;
+end
+
+// Set initial reset
+initial begin
+    rst = 1'b1;
+    #30 rst = 1'b0;
+end
+
+// Set occurrence of sequence
+initial begin
+    #30 sequence = 1'b1;
+    #20 sequence = 1'b0;
+    #20 sequence = 1'b1;
+    #20 sequence = 1'b1;
+    #20 sequence = 1'b0;
+    #20 sequence = 1'b1;
+    #20 sequence = 1'b0;
+    #20 sequence = 1'b1;
+end
+
+// Instantiate the sequence detector
+sequence_detector uut (
+    .clk(clk),
+    .rst(rst),
+    .sequence(sequence),
+    .tick(tick)
+);
+
+always #10 clk = ~clk;
+
+endmodule
+

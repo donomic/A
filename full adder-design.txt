@@ -1,0 +1,77 @@
+// Name    : Jay Sanga
+// Roll No.: 303175
+// PRN No. : 22320197
+// Batch   : C3
+
+`timescale 1ns / 1ps
+
+module adder_4bit(
+    input [3:0] A,
+    input [3:0] B,
+    input Cin,
+    output [3:0] sum,
+    output Cout
+);
+
+assign {Cout,sum} = A + B + Cin;
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// `timescale 1ns / 1ps
+module adder_4bit_tb();
+reg [3:0] a_in;
+reg [3:0] b_in;
+reg c_in;
+wire [3:0] sum;
+wire carry;
+
+initial
+begin
+    a_in = 4'b0;
+    b_in = 4'b0;
+    c_in = 1'b0;
+
+    #10 a_in = 4'b1111;
+        b_in = 4'b1100;
+        c_in = 1'b0;
+
+    #10 a_in = 4'b0010;
+        b_in = 4'b0101;
+        c_in = 1'b1;
+
+    #10 a_in = 4'b0110;
+        b_in = 4'b0111;
+        c_in = 1'b0;
+
+    #10 a_in = 4'b1111;
+        b_in = 4'b1011;
+        c_in = 1'b1;
+
+    #20 $finish;
+end
+
+adder_4bit dut (
+    .A (a_in),
+    .B (b_in),
+    .Cin (c_in),
+    .sum (sum),
+    .Cout (carry)
+);
+endmodule

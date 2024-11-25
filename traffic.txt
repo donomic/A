@@ -1,0 +1,133 @@
+`timescale 1ns / 1ps
+
+module TrafficLightController (
+    input clk,
+    input reset,
+    output reg [2:0] lights // 3-bit output for lights (Red, Yellow, Green)
+);
+
+// State encoding
+parameter RED = 3'b001;
+parameter YELLOW = 3'b010;
+parameter GREEN = 3'b100;
+
+// Timing parameters (in clock cycles)
+parameter RED_TIME = 5; // Duration for red light
+parameter GREEN_TIME = 5; // Duration for green light
+parameter YELLOW_TIME = 2; // Duration for yellow light
+
+reg [1:0] state, next_state; // State registers
+reg [3:0] timer; // Timer to count clock cycles
+
+// State transitions
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        state <= RED; // Start in the RED state on reset
+        timer <= 0;
+    end else begin
+        state <= next_state; // Move to the next state
+        if (timer > 0)
+            timer <= timer - 1; // Countdown timer
+        else
+            timer <= 0;
+    end
+end
+
+// Next state logic and timer setup
+always @(*) begin
+    case (state)
+        RED: begin
+            lights = 3'b001; // Red light ON
+            if (timer == 0) begin
+                next_state = GREEN;
+                timer = GREEN_TIME;
+            end else begin
+                next_state = RED;
+            end
+        end
+
+        GREEN: begin
+            lights = 3'b100; // Green light ON
+            if (timer == 0) begin
+                next_state = YELLOW;
+                timer = YELLOW_TIME;
+            end else begin
+                next_state = GREEN;
+            end
+        end
+
+        YELLOW: begin
+            lights = 3'b010; // Yellow light ON
+            if (timer == 0) begin
+                next_state = RED;
+                timer = RED_TIME;
+            end else begin
+                next_state = YELLOW;
+            end
+        end
+
+        default: begin
+            next_state = RED;
+            timer = RED_TIME;
+        end
+    endcase
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+`timescale 1ns / 1ps
+
+module TrafficLightController_tb;
+
+reg clk;
+reg reset;
+
+wire [2:0] lights;
+
+// Instantiate the Traffic Light Controller
+TrafficLightController uut (
+    .clk(clk),
+    .reset(reset),
+    .lights(lights)
+);
+
+// Generate clock signal
+initial begin
+    clk = 0;
+end
+forever #5 clk = ~clk; // 10-unit clock period
+
+// Test sequence
+initial begin
+    reset = 1; #10; // Apply reset
+    reset = 0; #10; // Release reset
+
+    #100; // Run simulation for some time
+    $stop; // Stop simulation
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

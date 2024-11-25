@@ -1,0 +1,150 @@
+`timescale 1ns / 1ps
+
+module ram_lk ( 
+    input wire clk,
+    input wire reset,
+    input wire we,
+    input wire [9:0] addr,
+    input wire [7:0] data_in,
+    output reg [7:0] data_out
+);
+
+    // RAM array declaration
+    reg [7:0] ram [0:1023]; // 1 Kbyte RAM (1024 bytes)
+
+    // Memory operation
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            // Reset memory contents to 0
+            for (int i = 0; i < 1024; i = i + 1) begin
+                ram[i] <= 8'b0;
+            end
+            data_out <= 8'b0; // Clear output on reset
+        end else if (we) begin
+            ram[addr] <= data_in; // Write data to RAM
+        end else begin
+            data_out <= ram[addr]; // Read data from RAM
+        end
+    end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`timescale 1ns / 1ps
+
+module ram_lk_tb;
+
+// Inputs to the RAM
+reg clk;
+reg reset;
+reg we;
+reg [9:0] addr;
+reg [7:0] data_in;
+
+// Output from the RAM
+wire [7:0] data_out;
+
+// Instantiate the RAM
+ram_lk uut (
+    .clk(clk),
+    .reset(reset),
+    .we(we),
+    .addr(addr),
+    .data_in(data_in),
+    .data_out(data_out)
+);
+
+// Clock generation
+initial begin
+    clk = 0;
+end
+forever #5 clk = ~clk; // 10 ns clock period
+
+// Test sequence
+initial begin
+    // Initialize inputs
+    reset = 1;
+    we = 0;
+    addr = 0;
+    data_in = 0;
+
+    // Apply reset
+    #10;
+    reset = 0;
+#10 reset = 0;
+
+// Test case 1: Write data to RAM
+we = 1; // Enable write
+addr = 10; // Address 10
+data_in = 8'hAA; // Data to write (0xAA)
+#10; // Wait for clock
+we = 0; // Disable write
+
+// Test case 2: Read back data from RAM
+#10;
+addr = 10; // Check address 10
+#10; // Wait for clock
+
+if (data_out != 8'hAA) begin
+    $display("Error! Data read from address %d is %h, expected %h", addr, data_out, 8'hAA);
+end else begin
+    $display("Data read from address %d is correct: %h", addr, data_out);
+end
+
+// Test case 3: Write new data
+we = 1; // Enable write
+addr = 20; // Address 20
+data_in = 8'h55; // Data to write (0x55)
+#10; // Wait for clock
+we = 0; // Disable write
+
+// Test case 4: Read back data from address 20
+#10;
+addr = 20; // Check address 20
+#10; // Wait for clock
+
+if (data_out != 8'h55) begin
+    $display("Error! Data read from address %d is %h, expected %h", addr, data_out, 8'h55);
+end else begin
+    $display("Data read from address %d is correct: %h", addr, data_out);
+end
+
+// Test case 5: Reset the RAM
+reset = 1;
+#10 reset = 0;
+
+// Test case 6: Check data after reset
+#10;
+addr = 10; // Check address 10
+#10; // Wait for clock
+
+// Data should be reset to 0
+if (data_out != 8'h00) begin
+    $display("Error! Data read from address %d after reset is %h, expected %h", addr, data_out, 8'h00);
+end else begin
+    $display("Data read from address %d after reset is correct: %h", addr, data_out);
+end
+
+// End simulation
+#10 $finish;
+end
+endmodule

@@ -1,0 +1,86 @@
+// `timescale 1ns / 1ps
+
+module counter (
+    input clk,
+    input rst,
+    input up_down_sel,
+    output reg [3:0] count_out
+);
+
+always @(posedge clk or negedge rst)
+begin
+    if (rst == 0)
+    begin
+        count_out <= 4'b0000;
+    end
+    else
+    begin
+        if (up_down_sel == 1)
+        begin
+            count_out <= count_out + 1;
+        end
+        else
+        begin
+            count_out <= count_out - 1;
+        end
+    end
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// `timescale 1ns / 1ps
+
+module counter_tb();
+reg clk;
+reg rst;
+reg up_down_sel;
+wire [3:0] count_out;
+
+initial
+begin
+    clk = 1'b0;
+    forever
+    begin
+        #5 clk = ~clk;
+    end
+end
+
+initial
+begin
+    rst = 1'b0;
+    #15 rst = 1'b1;
+end
+
+initial
+begin
+    up_down_sel = 1'b1;
+    #160 up_down_sel = 1'b0;
+    #160 up_down_sel = 1'b1;
+    #100 $finish;
+end
+
+counter dut (
+    .clk (clk),
+    .rst (rst),
+    .up_down_sel (up_down_sel),
+    .count_out (count_out)
+);
+
+endmodule
