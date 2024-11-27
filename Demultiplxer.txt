@@ -1,0 +1,77 @@
+// 1-to-4 Demultiplexer Module
+module Demux1to4 (
+    input In,             // Input
+    input [1:0] Sel,      // 2-bit select lines
+    output reg [3:0] Out  // 4 outputs
+);
+    // Demultiplexer logic
+    always @(*) begin
+        Out = 4'b0000; // Default all outputs to 0
+        case (Sel)
+            2'b00: Out[0] = In; // Select line 00 -> Out[0]
+            2'b01: Out[1] = In; // Select line 01 -> Out[1]
+            2'b10: Out[2] = In; // Select line 10 -> Out[2]
+            2'b11: Out[3] = In; // Select line 11 -> Out[3]
+        endcase
+    end
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`timescale 1ns / 1ps
+
+module Demux1to4_tb;
+    // Testbench signals
+    reg In;              // Input signal
+    reg [1:0] Sel;       // 2-bit select lines
+    wire [3:0] Out;      // Outputs
+
+    // Instantiate the Demux module
+    Demux1to4 uut (
+        .In(In),
+        .Sel(Sel),
+        .Out(Out)
+    );
+
+    // Test stimulus
+    initial begin
+        // Display header
+        $display("In Sel | Out");
+        $monitor("%b  %b  | %b", In, Sel, Out);
+
+        // Test all input combinations
+        In = 0; Sel = 2'b00; #10; // In=0, should output 0000
+        In = 1; Sel = 2'b00; #10; // Out[0]=1
+        In = 1; Sel = 2'b01; #10; // Out[1]=1
+        In = 1; Sel = 2'b10; #10; // Out[2]=1
+        In = 1; Sel = 2'b11; #10; // Out[3]=1
+        In = 0; Sel = 2'b11; #10; // Reset to zero outputs
+
+        // End simulation
+        $finish;
+    end
+endmodule

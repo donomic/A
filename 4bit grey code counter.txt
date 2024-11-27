@@ -1,0 +1,100 @@
+module GrayCodeCounter (
+    input clk,             // Clock signal
+    input reset,           // Reset signal (active high)
+    output reg [3:0] gray  // 4-bit Gray Code output
+);
+    reg [3:0] binary;      // 4-bit binary counter for internal use
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            binary <= 4'b0000;  // Reset binary counter to 0
+            gray <= 4'b0000;    // Reset Gray code output to 0
+        end else begin
+            binary <= binary + 1;           // Increment binary counter
+            gray <= (binary >> 1) ^ binary; // Convert to Gray Code
+        end
+    end
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`timescale 1ns / 1ps
+
+module GrayCodeCounter_tb;
+    // Testbench signals
+    reg clk;              // Clock
+    reg reset;            // Reset
+    wire [3:0] gray;      // 4-bit Gray Code output
+
+    // Instantiate the Gray Code Counter
+    GrayCodeCounter uut (
+        .clk(clk),
+        .reset(reset),
+        .gray(gray)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk; // Toggle clock every 5ns
+    end
+
+    // Test stimulus
+    initial begin
+        // Display header
+        $display("Time\tReset\tGray");
+        $monitor("%0d\t%b\t%b", $time, reset, gray);
+
+        // Initialize signals
+        reset = 1; #10;   // Apply reset
+        reset = 0;        // Release reset
+
+        // Run counter for a few cycles
+        #100;
+
+        // Apply reset again
+        reset = 1; #10;   // Apply reset
+        reset = 0;        // Release reset
+
+        // Run for additional cycles
+        #50;
+
+        // End simulation
+        $finish;
+    end
+endmodule
